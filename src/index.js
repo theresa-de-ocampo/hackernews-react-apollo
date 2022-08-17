@@ -18,9 +18,9 @@ const client = new ApolloClient({
     cache: new InMemoryCache()
 });
 
-ReactDOM.render(
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
     <ApolloProvider client={client}>
         <App />
-    </ApolloProvider>,
-    document.getElementById("root")
+    </ApolloProvider>
 );
