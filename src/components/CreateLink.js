@@ -1,7 +1,9 @@
 import React from "react";
 import { useMutation, gql } from "@apollo/client";
+import { useNavigate } from "react-router-dom";
 
 export default function CreateLink() {
+    const navigate = useNavigate();
     const [formData, setFormData] = React.useState({
         description: "",
         url: ""
@@ -28,7 +30,8 @@ export default function CreateLink() {
         variables: {
             description: formData.description,
             url: formData.url
-        }
+        },
+        onCompleted: () => navigate("/")
     });
 
     return (
