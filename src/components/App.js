@@ -1,7 +1,8 @@
-import React from "react";
-import LinkList from "./LinkList";
 import CreateLink from "./CreateLink";
 import Header from "./Header";
+import LinkList from "./LinkList";
+import Login from "./Login";
+import React from "react";
 import { Routes, Route } from "react-router-dom";
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
                 <Routes>
                     <Route path="/" element={<LinkList />} />
                     <Route path="/create" element={<CreateLink />} />
+                    <Route path="/login" element={<Login />} />
                 </Routes>
             </div>
         </div>
