@@ -1,6 +1,7 @@
 import React from "react";
 import { useMutation, gql } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
+import { FEED_QUERY } from "./LinkList";
 
 export default function CreateLink() {
     const navigate = useNavigate();
@@ -16,6 +17,16 @@ export default function CreateLink() {
                 createdAt
                 url
                 description
+                postedBy {
+                    id
+                    name
+                }
+                votes {
+                    id
+                    user {
+                        id
+                    }
+                }
             }
         }
     `;
@@ -30,6 +41,21 @@ export default function CreateLink() {
         variables: {
             description: formData.description,
             url: formData.url
+        },
+        update: (cache, {data: { post }}) => {
+            const data = cache.readQuery({
+                query: FEED_QUERY
+            });
+
+            cache.writeQuery({
+                query: FEED_QUERY,
+                data: {
+                    feed: {
+                        ...data.feed,
+                        links: [post, ...data.feed.links]
+                    }
+                }
+            });
         },
         onCompleted: () => navigate("/")
     });
