@@ -11,6 +11,9 @@ import {
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import { AUTH_TOKEN } from "./constants";
+import { split } from "@apollo/client";
+import { WebSocketLink } from "@apollo/client/link/ws";
+import { getMainDefinition } from "@apollo/client/utilities";
 
 const httpLink = createHttpLink({
     uri: "http://localhost:4000"
@@ -32,8 +35,46 @@ const authLink = setContext((_, { headers }) => {
     }
 });
 
+// Create a new WebSocketLink that represents the WebSocket connection
+const wsLink = new WebSocketLink({
+    uri: "ws://localhost:4000/graphql",
+    options: {
+        reconnect: true,
+        connectionParams: {
+            authToken: localStorage.getItem(AUTH_TOKEN)
+        }
+    }
+});
+
+/* 
+    Directional Composition
+    You might want your link chain's execution to branch, depending on the details
+    of the operation being performed. You can define this logic with the split method
+    of an Apollo instance. This method takes three parameters:
+        (1) test
+            A function that takes in the current Operation, and returns either true
+            or false depending on its details.
+        (2) left
+            The link to execute next if the test function returns true.
+        (3) right
+            An optional link to execute next if the test function returns false.
+            If this is not provided, the request handler's forward parameter is used.
+        
+    split is used to "route" a request to a specific middleware link.
+ */
+const link = split(
+    ({ query }) => {
+        const { kind, operation } = getMainDefinition(query);
+        return (
+            kind === "OperationDefinition" && operation === "subscription"
+        )
+    },
+    wsLink,
+    authLink.concat(httpLink)
+);
+
 const client = new ApolloClient({
-    link: authLink.concat(httpLink),
+    link,
     cache: new InMemoryCache()
 });
 
